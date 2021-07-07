@@ -4,7 +4,7 @@ from vault_client_lib import vault_client
 
 import json
 
-with open('data20210706210212.json') as f:
+with open('data20210707153112.json') as f:
     filedata = json.load(f)
 
 ciphertext = filedata['ciphertext']
