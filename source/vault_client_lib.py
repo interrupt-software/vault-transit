@@ -125,7 +125,6 @@ if __name__ == "__main__":
     VAULT_MOUNTPOINT = 'transit'
 
     if "VAULT_ADDR" in os.environ and "VAULT_TOKEN" in os.environ and "VAULT_TRANSIT_KEYRING":
-
         VAULT_ADDR = os.environ.get('VAULT_ADDR')
         VAULT_TOKEN = os.environ.get('VAULT_TOKEN')
         VAULT_TRANSIT_KEYRING = os.environ.get('VAULT_TRANSIT_KEYRING')
