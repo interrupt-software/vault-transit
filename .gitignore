@@ -19,3 +19,7 @@
 # Python Cache
 ######################
 __pycache__
+
+# Vault configuration
+######################
+vault_config

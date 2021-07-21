@@ -26,12 +26,13 @@ def connect(vault_addr=None, vault_token=None):
     return client
 
 
-def get_secret(client=None, vault_key_name=None):
+def get_secret(client=None, vault_key_name=None, mount_point='transit'):
     response = None
     try:
         response = client.secrets.transit.generate_data_key(
             name=vault_key_name,
             key_type='plaintext',
+            mount_point=mount_point
         )
     except:
         exit()
@@ -43,16 +44,20 @@ if __name__ == "__main__":
 
     VAULT_ADDR = None
     VAULT_TOKEN = None
-    VAULT_ENDPOINT = None
+    VAULT_TRANSIT_KEYRING = None
+    VAULT_MOUNTPOINT = 'transit'
 
-    if "VAULT_ADDR" in os.environ and "VAULT_TOKEN" in os.environ and "VAULT_TRANSIT_KEYNAME":
+    if "VAULT_ADDR" in os.environ and "VAULT_TOKEN" in os.environ and "VAULT_TRANSIT_KEYRING":
+
         VAULT_ADDR = os.environ.get('VAULT_ADDR')
         VAULT_TOKEN = os.environ.get('VAULT_TOKEN')
-        VAULT_TRANSIT_KEYNAME = os.environ.get('VAULT_TRANSIT_KEYNAME')
+        VAULT_TRANSIT_KEYRING = os.environ.get('VAULT_TRANSIT_KEYRING')
+
+        if "VAULT_MOUNTPOINT" in os.environ:
+            VAULT_MOUNTPOINT = os.environ.get('VAULT_MOUNTPOINT')
 
     client = connect(VAULT_ADDR, VAULT_TOKEN)
-    response = get_secret(client, VAULT_TRANSIT_KEYNAME)
-
+    response = get_secret(client, VAULT_TRANSIT_KEYRING, VAULT_MOUNTPOINT)
     plaintext = response['data']['plaintext']
     ciphertext = response['data']['ciphertext']
 

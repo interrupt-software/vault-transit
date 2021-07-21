@@ -1,6 +1,19 @@
 import logging
 import hvac
 import os
+import pprint
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
 class vault_client:
@@ -38,29 +51,31 @@ class vault_client:
 
         return self
 
-    def get_datakey(self, vault_key_name=None):
+    def get_datakey(self, vault_transit_keyring=None, mount_point='transit'):
         """
         Returns the payload for a new high-entropy key and the value encrypted with the named key. The data key is included in base64 encoded plaintext, and the ciphertext is used as reference to re-obtain the derived key payload.
 
-        :param str vault_key_name: Name of the encryption key to use to encrypt the datakey
+        :param str vault_transit_keyring: Name of the encryption key to use to encrypt the datakey
+        :param str mount_point: The “path” on which the method/backend was mounted
         """
-        if not vault_key_name:
+        if not vault_transit_keyring:
             logging.warning(
-                "Vault Transit key name missing. Looking for environment variable `VAULT_TRANSIT_KEYNAME`.")
+                "Vault Transit keyring name missing. Looking for environment variable `VAULT_TRANSIT_KEYRING`.")
 
-            if 'VAULT_TRANSIT_KEYNAME' in os.environ:
-                vault_key_name = os.environ.get('VAULT_TRANSIT_KEYNAME')
+            if 'VAULT_TRANSIT_KEYRING' in os.environ:
+                vault_key_name = os.environ.get('VAULT_TRANSIT_KEYRING')
             else:
                 logging.error(
-                    "`VAULT_TRANSIT_KEYNAME` must be set in your environment.")
+                    "`VAULT_TRANSIT_KEYRING` must be set in your environment.")
                 exit()
 
         response = None
 
         try:
             response = self.client.secrets.transit.generate_data_key(
-                name=vault_key_name,
+                name=vault_transit_keyring,
                 key_type='plaintext',
+                mount_point=mount_point
             )
         except:
             logging.error("Unable to authenticate with Vault.")
@@ -68,30 +83,32 @@ class vault_client:
 
         return response
 
-    def decrypt_datakey(self, ciphertext=None, vault_key_name=None):
+    def decrypt_datakey(self, ciphertext=None, vault_transit_keyring=None, mount_point='transit'):
         """
         Returns the payload for a new high-entropy key in plaintext.
 
         :param str ciphertext: Specifies the ciphertext to decrypt. This should be a part of the derived key payload.
-        :param str vault_key_name: Name of the encryption key to use to initially encrypt the datakey
+        :param str vault_transit_keyring: Name of the encryption key to use to initially encrypt the datakey
+        :param str mount_point: The “path” on which the method/backend was mounted
         """
-        if not vault_key_name:
+        if not vault_transit_keyring:
             logging.warning(
-                "Vault Transit key name missing. Looking for environment variable `VAULT_TRANSIT_KEYNAME`.")
+                "Vault Transit keyring name missing. Looking for environment variable `VAULT_TRANSIT_KEYRING`.")
 
-            if 'VAULT_TRANSIT_KEYNAME' in os.environ:
-                vault_key_name = os.environ.get('VAULT_TRANSIT_KEYNAME')
+            if 'VAULT_TRANSIT_KEYRING' in os.environ:
+                vault_key_name = os.environ.get('VAULT_TRANSIT_KEYRING')
             else:
                 logging.error(
-                    "`VAULT_TRANSIT_KEYNAME` must be set in your environment.")
+                    "`VAULT_TRANSIT_KEYRING` must be set in your environment.")
                 exit()
 
         response = None
 
         try:
             response = self.client.secrets.transit.decrypt_data(
-                name=vault_key_name,
-                ciphertext=ciphertext
+                name=vault_transit_keyring,
+                ciphertext=ciphertext,
+                mount_point=mount_point
             )
         except:
             logging.error("Unable to retreive DEK.")
@@ -102,12 +119,46 @@ class vault_client:
 
 if __name__ == "__main__":
 
+    VAULT_ADDR = None
+    VAULT_TOKEN = None
+    VAULT_TRANSIT_KEYRING = None
+    VAULT_MOUNTPOINT = 'transit'
+
+    if "VAULT_ADDR" in os.environ and "VAULT_TOKEN" in os.environ and "VAULT_TRANSIT_KEYRING":
+
+        VAULT_ADDR = os.environ.get('VAULT_ADDR')
+        VAULT_TOKEN = os.environ.get('VAULT_TOKEN')
+        VAULT_TRANSIT_KEYRING = os.environ.get('VAULT_TRANSIT_KEYRING')
+
+    if "VAULT_MOUNTPOINT" in os.environ:
+        VAULT_MOUNTPOINT = os.environ.get('VAULT_MOUNTPOINT')
+
+    if not VAULT_ADDR:
+        logging.error(
+            "`VAULT_ADDR` variable must be set in your environment.")
+        exit()
+
+    if not VAULT_TOKEN:
+        logging.error(
+            "`VAULT_TOKEN` variable must be set in your environment.")
+        exit()
+
+    if not VAULT_TRANSIT_KEYRING:
+        logging.error(
+            "`VAULT_TRANSIT_KEYRING` must be set in your environment.")
+        exit()
+
     client = vault_client()
-    client.connect()
-    response = client.get_datakey()
-    print(response)
+    client.connect(VAULT_ADDR, VAULT_TOKEN)
+    response = client.get_datakey(VAULT_TRANSIT_KEYRING, VAULT_MOUNTPOINT)
+
+    pp = pprint.PrettyPrinter(indent=2)
+    print(f"{bcolors.OKGREEN}\n\nData key request:\n{bcolors.ENDC}")
+    pp.pprint(response)
 
     plaintext = response['data']['plaintext']
     ciphertext = response['data']['ciphertext']
 
-    print(client.decrypt_datakey(ciphertext))
+    print(f"{bcolors.OKGREEN}\n\nData key recall:\n{bcolors.ENDC}")
+    pp.pprint(client.decrypt_datakey(
+        ciphertext, VAULT_TRANSIT_KEYRING, VAULT_MOUNTPOINT))
