@@ -2,6 +2,7 @@ import logging
 import hvac
 import os
 import pprint
+import sys
 
 
 class bcolors:
@@ -119,30 +120,24 @@ class vault_client:
 
 if __name__ == "__main__":
 
-    VAULT_ADDR = None
-    VAULT_TOKEN = None
-    VAULT_TRANSIT_KEYRING = None
-    VAULT_MOUNTPOINT = 'transit'
-
-    if "VAULT_ADDR" in os.environ and "VAULT_TOKEN" in os.environ and "VAULT_TRANSIT_KEYRING":
-        VAULT_ADDR = os.environ.get('VAULT_ADDR')
-        VAULT_TOKEN = os.environ.get('VAULT_TOKEN')
-        VAULT_TRANSIT_KEYRING = os.environ.get('VAULT_TRANSIT_KEYRING')
-
-    if "VAULT_MOUNTPOINT" in os.environ:
-        VAULT_MOUNTPOINT = os.environ.get('VAULT_MOUNTPOINT')
+    VAULT_ADDR = os.environ.get('VAULT_ADDR', None)
+    VAULT_TOKEN = os.environ.get('VAULT_TOKEN', None)
+    VAULT_MOUNTPOINT = os.environ.get('VAULT_MOUNTPOINT', None)
+    VAULT_TRANSIT_KEYRING = os.environ.get('VAULT_TRANSIT_KEYRING', None)
 
     if not VAULT_ADDR:
         logging.error(
             "`VAULT_ADDR` variable must be set in your environment.")
         exit()
-
-    if not VAULT_TOKEN:
+    elif not VAULT_TOKEN:
         logging.error(
             "`VAULT_TOKEN` variable must be set in your environment.")
         exit()
-
-    if not VAULT_TRANSIT_KEYRING:
+    elif not VAULT_MOUNTPOINT:
+        logging.error(
+            "`VAULT_MOUNTPOINT` must be set in your environment.")
+        exit()
+    elif not VAULT_TRANSIT_KEYRING:
         logging.error(
             "`VAULT_TRANSIT_KEYRING` must be set in your environment.")
         exit()
@@ -161,3 +156,13 @@ if __name__ == "__main__":
     print(f"{bcolors.OKGREEN}\n\nData key recall:\n{bcolors.ENDC}")
     pp.pprint(client.decrypt_datakey(
         ciphertext, VAULT_TRANSIT_KEYRING, VAULT_MOUNTPOINT))
+
+    modulesToDelete = []
+    for m in sys.modules:
+        moduleName = str(m)
+        if "myLibrary." in moduleName:
+            modulesToDelete.append(moduleName)
+    currentModule = __name__
+    for mod in modulesToDelete:
+        if mod != currentModule:  # Python cannot delete the current module
+            del sys.modules[mod]

@@ -16,10 +16,12 @@
 .DS_Store
 .DS_Store?
 
-# Python Cache
-######################
+# Python Cache (if any) #
+#########################
 __pycache__
 
 # Vault configuration
 ######################
 vault_config
+
+https://www.marcusfelling.com/blog/2021/reasons-to-use-bicep-over-terraform/
