@@ -71,7 +71,17 @@ In this context, the consumer routes a data blob through the encryption endpoint
 
 ![alt text][Vault-eaas]
 
+```bash
+  vault write transit/encrypt/app-01 \
+  plaintext=$(base64 <<< "4024-0071-7958-8446")
+```
 
+```bash
+  Key            Value
+  ---            -----
+  ciphertext     vault:v1:DFA010gVDW5ks6S5hQIjbRjuIhEXSnLm9gjYhRPqd+rZEdShzkXG0zb9kadL35g=
+  key_version    1
+```
 
 ## Generating an external data key
 
@@ -81,7 +91,7 @@ In this context, the consumer routes a data blob through the encryption endpoint
 
  ![alt text][Encryption-ops]
 
- [Vault-auth]: images/image_01_vault_auth.svg "Vault Authentication: Access to Vault requires vetting consumer identity."
- [Vault-eaas]: images/image_02_transit_eaas.svg "Encryption-as-a-Service: Routing data through Vault Transit Secrets Engine."
- [Vault-eaas-key]: images/image_03_transit_key.svg "Encryption-as-a-Service External Key: Using a derived key from the main Transit key chain."
- [Encryption-ops]: images/image_04_encryption_ops.svg "Encryption Operations: Using the external data key for encryption and decryption."
+ [Vault-auth]: images/image_01_vault_auth.svg "Vault Authentication: Access to Vault requires vetting the consumer's identity"
+ [Vault-eaas]: images/image_02_transit_eaas.svg "Encryption-as-a-Service: Routing data through Vault Transit Secrets Engine"
+ [Vault-eaas-key]: images/image_03_transit_key.svg "Encryption-as-a-Service External Key: Using a high-entropy key from the main Transit key chain"
+ [Encryption-ops]: images/image_04_encryption_ops.svg "Encryption Operations: Using the external data key for encryption and decryption operations"
