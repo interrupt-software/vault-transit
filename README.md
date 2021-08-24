@@ -9,13 +9,6 @@ Any consumer that interacts with Vault requires authentication. The basic premis
 ### Authentication
 In the illustration below, the consumer uses an LDAP account to authenticate with Vault—the Vault LDAP Authentication engine aligns with the corporate LDAP Engine to verify and confirm the identity.
 
-### Authorization
-Once the consumer's identity is validated, Vault links internal access policies that describe the capabilities expressed for the consumer. Polices align with Vault users and Vault groups that reflect a hierarchical structure for the consumer's environment. 
-
-From the diagram, **Application 01** can be an individual component managed by a unique identity. Or, **Application 01** is part of a group of resources all governed by a shared identity. In either case, the linked policies describe the authorization to the secrets engine for the consumer and its identity.
- 
- ![alt text][Vault-auth]
-
 In a coded Python example, we can use a [Vault Client](https://hvac.readthedocs.io/) library to authenticate directly with Vault. 
 
 ```python
@@ -25,6 +18,13 @@ In a coded Python example, we can use a [Vault Client](https://hvac.readthedocs.
         mount_point=ldap_auth_path,
     )
 ```
+
+### Authorization
+Once the consumer's identity is validated, Vault links internal access policies that describe the capabilities expressed for the consumer. Polices align with Vault users and Vault groups that reflect a hierarchical structure for the consumer's environment. 
+
+From the diagram, **Application 01** can be an individual component managed by a unique identity. Or, **Application 01** is part of a group of resources all governed by a shared identity. In either case, the linked policies describe the authorization to the secrets engine for the consumer and its identity.
+ 
+ ![alt text][Vault-auth]
 
 With a successful validation of the consumers's identity, Vault returns a payload that includes a bearer token. The consumer uses the token to access the desired Secrets Engine, and the policies linked to the token authorize the capabilities that the consumer can apply. 
 
