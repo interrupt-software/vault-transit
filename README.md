@@ -9,7 +9,7 @@ Any consumer that interacts with Vault requires authentication. The basic premis
 ### Authentication
 In the illustration below, the consumer uses an LDAP account to authenticate with Vault—the Vault LDAP Authentication engine aligns with the corporate LDAP Engine to verify and confirm the identity.
 
-In a coded Python example, we can use a [Vault Client](https://hvac.readthedocs.io/) library to authenticate directly with Vault. 
+For example, in a code example, we can use the Python [HVAC Client](https://hvac.readthedocs.io/) library to authenticate directly with Vault.
 
 ```python
     self.client.enable_auth_backend(
@@ -26,15 +26,52 @@ From the diagram, **Application 01** can be an individual component managed by a
  
  ![alt text][Vault-auth]
 
-With a successful validation of the consumers's identity, Vault returns a payload that includes a bearer token. The consumer uses the token to access the desired Secrets Engine, and the policies linked to the token authorize the capabilities that the consumer can apply. 
+With a successful validation of the consumers's identity, Vault returns a payload that includes a bearer token. The consumer uses the token to access the desired Secrets Engine, and the policies linked to the token authorize the capabilities that the consumer can apply.
+
+In a different scenario, interacting directly with the Vault CLI, a token can be prepared for direct access.
+
+```bash
+  vault token create -policy=app-01
+```
+
+The signifcance is the alignment with the desired policy which allows the consumer to access the resources described by the policy **app-01**.
+
+```bash
+  Key                  Value
+  ---                  -----
+  token                s.dHIi7Wf1dU2paz8GVnuc1UQO
+  token_accessor       eJI7ogIBOkHaVkgVFcs2Ffeo
+  token_duration       768h
+  token_renewable      true
+  token_policies       ["app-01" "default"]
+  identity_policies    []
+  policies             ["app-01" "default"]
+```
+
+The policy itself describes the encryption and decryption capabilities that apply to the Transit Secrets Engine end point.
+
+```json
+path "transit/encrypt/app-01" {
+   capabilities = [ "update" ]
+}
+
+path "transit/decrypt/app-01" {
+   capabilities = [ "update" ]
+}
+
+```
 
 ## Encryption-as-a-Service
 
 In general encryption-as-a-service practices, the expectation is that a service consumer routes the payload through the Transit Secrets Engine, receiving an encrypted blob in return. The service consumer is then responsible for storing the content in a desired endpoint with the encrypted material.
 
-To illustrate with an example, assume a named key to support encryption services of documents. The key is configured the AES-GCM with a 256-bit AES and a 96-bit nonce mode operations and is used to support encryption, decryption, key derivation, and convergent encryption.
+To illustrate with an example, assume a named key to support encryption services of documents. The endpoint **app-01** is configured with a AES-GCM with a 256-bit AES and a 96-bit nonce mode operations and is used to support encryption, decryption, key derivation, and convergent encryption.
 
- ![alt text][Vault-eaas]
+In this context, the consumer routes a data blob through the encryption endpoint, and the secrets engine returns a response object that includes encrypted data. The consumer is responsible for safely storing the encrypted data on an appropriate storage medium.
+
+![alt text][Vault-eaas]
+
+
 
 ## Generating an external data key
 
