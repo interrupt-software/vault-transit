@@ -4,6 +4,12 @@
 
  In general encryption-as-a-service practices, the expectation is that a service consumer routes the payload through the Transit Secrets Engine, receiving an encrypted blob in return. With the encrypted material, the service consumer is then responsible for storing the content in a desired endpoint.
 
- ![alt text][EaaS-auth]
+ ![alt text][Vault-auth]
+ ![alt text][Vault-eaas]
+ ![alt text][Vault-eaas-key]
+ ![alt text][Encryption-ops]
 
- [EaaS-auth]: images/Image01_Transit_EaaS.svg "Encryption-as-a-Service Authentication"
+ [Vault-auth]: images/image_01_vault_auth.svg "Vault Authentication"
+ [Vault-eaas]: images/image_02_transit_eaas.svg "Encryption-as-a-Service"
+ [Vault-eaas-key]: images/image_03_transit_key.svg "Encryption-as-a-Service External Key"
+ [Encryption-ops]: images/image_04_encryption_ops.svg "Encryption Operations"
