@@ -142,12 +142,12 @@ In a routine operation, the consumer can generate a request which responds with 
  The ciphertext returned reflects the encrypted value of the plaintext. The ciphertext is used to recall the data key when needed. The consumer must preserve the ciphertext and the relationship to the data file or data object involved in the encryption or decryption operations.
 
  The plaintext is a bytes object of a named data key. The bytes object can be 128, 256 or 256 bits in length, and it is encoded in the base64 scheme. Once unwrapped, the consumer uses this object to create a block `cipher`. The cipher must be combined with a mode of operation to support symmetric or asymmetric encryption MODES.
-
- In the example for encryption operations, we reference Advanced Encryption Standard (AES) MODE Cipher-Block Chaining (CBC). Depending on the implementation library used for this operation, there can be additional parameters to fulfill. For instance, with Python tests, the AES.MODE_CBC requires an initialization vector (iv) parameter that is unique to the operation. Hence, it also needs to be documented in the metadata for future reference.
-
- There are multiple techniques to accomplish the work. For illustration purposes, we save the metadata externally in a JSON object for future reference. In other situations, the data is added to the encrypted payload, and positional information is written in the header of the encrypted object itself.
  
 ## Applying the data key for distinct encryption operations
+
+In the example for encryption operations, we reference Advanced Encryption Standard (AES) MODE Cipher-Block Chaining (CBC). Depending on the implementation library used for this operation, there can be additional parameters to fulfill. For instance, with Python tests, the AES.MODE_CBC requires an initialization vector (iv) parameter that is unique to the operation. Hence, it also needs to be documented in the metadata for future reference.
+
+ There are multiple techniques to accomplish the work. For illustration purposes, we save the metadata externally in a JSON object for future reference. In other situations, the data is added to the encrypted payload, and positional information is written in the header of the encrypted object itself.
 
  ![alt text][Encryption-ops]
 
