@@ -143,13 +143,14 @@ In a routine operation, the consumer can generate a request which responds with 
 
  The plaintext is a bytes object of a named data key. The bytes object can be 128, 256 or 256 bits in length, and it is in encoded in the base64 scheme. Once unwrapped, the consumer uses this object to crate an block `cipher`. The cipher must be combined with a mode of operation to support symmetric or asymmetric encryption MODES.
 
- In the example for encryption operations, we reference Advanced Encryption Standard (AES) MODE. For every encryption function, there must be a decryption function. And, in every situation, a newly created cipher must use a key to perform the assigned task.
-
+ In the example for encryption operations, we reference Advanced Encryption Standard (AES) MODE Cipher-Block Chaining (CBC). Depending on the implementation library used for this operation, there can be additional parameters to fullfil. For instance, with Python tests, the AES.MODE_CBC requires an initialization vector (iv) parameter that is unique to the operation. Hence, it also needs to be documented in the metadata for future reference.
+ 
+ 
 ## Applying the data key for distinct encryption operations
 
  ![alt text][Encryption-ops]
 
- In this situation, the consumer must be able to obtain a corresponding key for the data blob. For a new encryption operation, the key is generated directly from the Transit Secrets Engine. Once the operation is completed, the key is discarded and the correspondign ciphertext is saved. The ciphertext also needs to have a relational link to the object used in the encryption process.
+ For every encryption function, there must be a decryption function. And, in every situation, a newly created cipher must use a key to perform the assigned task. In this situation, the consumer must be able to obtain a corresponding key for the data blob. For a new encryption operation, the key is generated directly from the Transit Secrets Engine. Once the operation is completed, the key is discarded and the correspondign ciphertext is saved. The ciphertext also needs to have a relational link to the object used in the encryption process.
 
  There are multiple techniques to accomplish the work. For illustration purposes, we save the metadata externally in a JSON object for future reference. In other situations, the data can be added to the encrypted payload, and positional data is written in the header of the encrypted object itself.
 
