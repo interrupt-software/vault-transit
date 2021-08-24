@@ -3,6 +3,7 @@ from base64 import b64decode
 from vault_client_lib import vault_client
 import json
 import sys
+import os
 
 in_filename = sys.argv[1]
 in_metadata = in_filename + ".json"
@@ -15,8 +16,15 @@ with open(in_metadata) as f:
 ciphertext = metadata['ciphertext']
 e_iv = b64decode(str(metadata['iv']).encode('utf-8'))
 
-vault_client = vault_client().connect()
-response = vault_client.decrypt_datakey(ciphertext)
+VAULT_ADDR = os.environ.get('VAULT_ADDR', None)
+VAULT_TOKEN = os.environ.get('VAULT_TOKEN', None)
+VAULT_MOUNTPOINT = os.environ.get('VAULT_MOUNTPOINT', None)
+VAULT_TRANSIT_KEYRING = os.environ.get('VAULT_TRANSIT_KEYRING', None)
+
+client = vault_client()
+client.connect(VAULT_ADDR, VAULT_TOKEN)
+response = client.decrypt_datakey(
+    ciphertext, VAULT_TRANSIT_KEYRING, VAULT_MOUNTPOINT)
 plaintext = response['data']['plaintext']
 
 key = b64decode(str(plaintext).encode('utf-8'))

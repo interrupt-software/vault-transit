@@ -156,6 +156,7 @@ if __name__ == "__main__":
     print(f"{bcolors.OKGREEN}\n\nData key recall:\n{bcolors.ENDC}")
     pp.pprint(client.decrypt_datakey(
         ciphertext, VAULT_TRANSIT_KEYRING, VAULT_MOUNTPOINT))
+    print("\n")
 
     modulesToDelete = []
     for m in sys.modules:

@@ -5,9 +5,16 @@ from base64 import b64decode, b64encode
 from vault_client_lib import vault_client
 import json
 import sys
+import os
 
-vault_client = vault_client().connect()
-response = vault_client.get_datakey()
+VAULT_ADDR = os.environ.get('VAULT_ADDR', None)
+VAULT_TOKEN = os.environ.get('VAULT_TOKEN', None)
+VAULT_MOUNTPOINT = os.environ.get('VAULT_MOUNTPOINT', None)
+VAULT_TRANSIT_KEYRING = os.environ.get('VAULT_TRANSIT_KEYRING', None)
+
+client = vault_client()
+client.connect(VAULT_ADDR, VAULT_TOKEN)
+response = client.get_datakey(VAULT_TRANSIT_KEYRING, VAULT_MOUNTPOINT)
 
 plaintext = response['data']['plaintext']
 ciphertext = response['data']['ciphertext']
