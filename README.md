@@ -16,14 +16,14 @@ From the diagram, **Application 01** can be an individual component managed by a
  
  ![alt text][Vault-auth]
 
-In the coded example, we use a Vault Client library for Python. 
+In a coded Python example, we can use a [Vault Client](https://hvac.readthedocs.io/) library to authenticate directly with Vault. 
 
 ```python
-        self.client = hvac.Client(
-            url=vault_addr,
-            token=vault_token,
-            verify=True,
-        )
+    self.client.enable_auth_backend(
+        backend_type='ldap',
+        description=description,
+        mount_point=ldap_auth_path,
+    )
 ```
 
 With a successful validation of the consumers's identity, Vault returns a payload that includes a bearer token. The consumer uses the token to access the desired Secrets Engine, and the policies linked to the token authorize the capabilities that the consumer can apply. 
