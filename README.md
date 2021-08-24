@@ -50,7 +50,7 @@ The signifcance is the alignment with the desired policy which allows the consum
 
 The policy itself describes the encryption and decryption capabilities that apply to the Transit Secrets Engine end point.
 
-```json
+```bash
 path "transit/encrypt/app-01" {
    capabilities = [ "update" ]
 }
