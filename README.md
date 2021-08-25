@@ -46,7 +46,7 @@ The main assets to consider in this exercise are:
 
 The essential step to encrypt new data is as follows: 
 
-```bash
+```console
   python3 e_aes_mode_cbc.py Account-Information-Form.pdf
 ```
 
@@ -59,7 +59,7 @@ The encryption module produces two files:
 
 To decrypt data the decryption module references an encrypted file by name. The module tries to find a corresponding JSON file with metadata. From the example above, assume that a local directory hosts an encrypted file and its corresponding metatadata:
 
-```bash
+```console
 tree              
 .
 ├── Account-Information-Form.pdf.aes.mode_cbc
@@ -68,7 +68,7 @@ tree
 
 The decryption is used as follows:
 
-```bash
+```console
   python3 d_aes_mode_cbc.py Account-Information-Form.pdf.aes.mode_cbc
 ```
 
@@ -101,7 +101,7 @@ In the illustration below, the consumer uses an LDAP account to authenticate wit
 
 For example, we use the Vault CLI to authenticate directly with Vault. Other methods are less involved and more automatic, and this example illustrates the implicit need to vet the consumers' identity.
 
-```bash
+```console
     vault login -method=ldap username=bender
     Password (will be hidden):
     Successfully authenticated! The policies that are associated
@@ -119,7 +119,7 @@ From the diagram, **Application 01** can be an individual component managed by a
 
 In this scenario, a policy describes the encryption and decryption capabilities as follows:
 
-```bash
+```console
 # app-01.hcl 
 path "transit/encrypt/app-01" {
    capabilities = [ "update" ]
@@ -134,7 +134,7 @@ Vault successfully validates the consumers' identity and returns a payload that 
 
 For the authenticated user, interacting directly with the Vault CLI, a bearer token allows for direct access to the secrets engine. 
 
-```bash
+```console
   Key                  Value
   ---                  -----
   token                s.dHIi7Wf1dU2paz8GVnuc1UQO
@@ -158,14 +158,14 @@ In this context, the consumer routes a data blob through the encryption endpoint
 
 Using the Vault CLI, the inline encryption operation requires passing the desired data encoded in the base64 scheme.
 
-```bash
+```console
   vault write transit/encrypt/app-01 \
   plaintext=$(base64 <<< "4024-0071-7958-8446")
 ```
 
 The returning payload object includes the corresponding encrypted ciphertext. The consumer is then responsible for storing the payload for future reference.
 
-```bash
+```console
   Key            Value
   ---            -----
   ciphertext     vault:v1:DFA010gVDW5ks6S5hQIjbRjuIhEXSnLm9gjYhRPqd+rZEdShzkXG0zb9kadL35g=
@@ -174,7 +174,7 @@ The returning payload object includes the corresponding encrypted ciphertext. Th
 
 For completeness, it is relevant to explain that the decryption procedure follows a similar pattern. With the successful authentication of the consumer, the policy allows for decryption services. The consumer then routes the ciphertext through Vault to obtain unencrypted data.
 
-```bash
+```console
   vault write transit/decrypt/app-01 \ 
   ciphertext="vault:v1:DFA010gVDW5ks6S5hQIjbRjuIhEXSnLm9gjYhRPqd+rZEdShzkXG0zb9kadL35g="
 
@@ -185,7 +185,7 @@ For completeness, it is relevant to explain that the decryption procedure follow
 
 The data produced is encoded in the base64 scheme and requires decoding.
 
-```bash
+```console
    base64 --decode <<< "NDAyNC0wMDcxLTc5NTgtODQ0Ng=="
    4024-0071-7958-8446
 ```
@@ -201,7 +201,7 @@ There are situations in which routing data through the Transit Secrets Engine is
 
 The first step is to update the appropriate capabilities to the consumer's policy. This ensures that the consumer can generate a new high-entropy key and value using **app-01** as the encryption key.
 
-```bash
+```console
 # app-01.hcl 
 path "transit/encrypt/app-01" {
    capabilities = [ "update" ]
@@ -218,7 +218,7 @@ path "transit/datakey/plaintext/app-01" {
 
 In a routine operation, the consumer can generate a request which responds with `ciphertext` and `plaintext` values.
 
-```bash
+```console
   vault write -f transit/datakey/plaintext/app-01 
   Key            Value
   ---            -----
