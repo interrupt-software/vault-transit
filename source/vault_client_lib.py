@@ -161,8 +161,7 @@ if __name__ == "__main__":
             "`VAULT_TRANSIT_KEYRING` must be set in your environment.")
         exit()
 
-    client = vault_client()
-    client.connect(VAULT_ADDR, VAULT_TOKEN)
+    client = vault_client(VAULT_ADDR, VAULT_TOKEN)
     response = client.get_datakey(VAULT_TRANSIT_KEYRING, VAULT_MOUNTPOINT)
 
     pp = pprint.PrettyPrinter(indent=2)

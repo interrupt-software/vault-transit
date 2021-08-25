@@ -25,7 +25,6 @@ d_cipher = AES.new(key, AES.MODE_CBC, e_iv)
 chunksize = 24*1024
 
 with open(in_filename, 'rb') as infile:
-
     with open(out_filename, 'wb') as outfile:
         while True:
             chunk = infile.read(chunksize)
