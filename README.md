@@ -26,11 +26,11 @@ The motivation for this exercise is to demonstrate practical, simplified example
 
 The main assets to consider in this exercise are:
 
-* **[e_aes_mode_cbc](source/e_aes_mode_cbc.py)**: Standalone encryption module that uses a Transit data key. This example applies AES.MODE_CBC encrytion and generates metadata. The `e` stands for `encription`.
+* **[e_aes_mode_cbc](source/e_aes_mode_cbc.py)**: Standalone encryption module that uses a Transit data key. This example applies AES.MODE_CBC encrytion and generates metadata. The `e` stands for `encryption`.
 
 * **[d_aes_mode_cbc](source/d_aes_mode_cbc.py)**: Standalone decryption module that retreives a Transit data key derived from the metadata information (created by the encryption module). The `d` stands for `decryption`.
 
-* **[vault_client_lib](source/vault_client_lib.py)**: A simple library utility that connects to and authenticates with a Vault instance. This library uses the [HVAC](https://github.com/hvac/hvac) API client for Vault. This asset requires four environment variables as follows:
+* **[vault_client_lib](source/vault_client_lib.py)**: A Python utility that connects to and authenticates with a Vault instance. This library uses the [HVAC](https://github.com/hvac/hvac) API client for Vault. This asset requires four environment variables as follows:
 
   * **VAULT_ADDR**: The network location of Vault. It is expressed as an URL like `http://127.0.0.1:8200`.
 
@@ -44,8 +44,8 @@ The main assets to consider in this exercise are:
 
 ### Configure the environment
 
-* Establish the inital Transit mount point as `transito`
-* Assume that we will label the key ring `app-02`
+* Establish the inital Transit mount point as `transit`
+* Assume that we will label the key ring `app-01`
 * Our Vault instance is running locally
 
 We express the environment variables in Bash as follows:
@@ -57,6 +57,71 @@ We express the environment variables in Bash as follows:
 ```
 
 ### Configure Vault
+
+- If using a clean instance of Vault, you can run in development mode as follows:
+
+```bash
+  vault server -dev -dev-root-token-id="root"
+```
+
+The response will generate a response similar to the following message:
+
+```bash
+WARNING! dev mode is enabled! In this mode, Vault runs entirely in-memory
+and starts unsealed with a single unseal key. The root token is already
+authenticated to the CLI, so you can immediately begin using Vault.
+
+You may need to set the following environment variable:
+
+    $ export VAULT_ADDR='http://127.0.0.1:8200'
+
+The unseal key and root token are displayed below in case you want to
+seal/unseal the Vault or re-authenticate.
+
+Unseal Key: 5O/1jtqUdmbytl+jNa9UNaTOxvbwtdFPhH0fX0m8FG4=
+Root Token: root
+
+Development mode should NOT be used in production installations!
+```
+- Unseal Vault
+```bash
+vault operator unseal
+Unseal Key (will be hidden): 
+
+Key             Value
+---             -----
+Seal Type       shamir
+Initialized     true
+Sealed          false
+Total Shares    1
+Threshold       1
+Version         1.8.1
+Storage Type    inmem
+Cluster Name    vault-cluster-632fa98d
+Cluster ID      7598338c-ac71-586e-4ffc-3a63d482f80a
+HA Enabled      false
+```
+- Log into Vault as the root user
+
+```bash
+vault login 
+Token (will be hidden): 
+
+Success! You are now authenticated. The token information displayed below
+is already stored in the token helper. You do NOT need to run "vault login"
+again. Future Vault requests will automatically use this token.
+
+Key                  Value
+---                  -----
+token                root
+token_accessor       Dd0yobC3qaJ5yoEsGuEsJrLm
+token_duration       ∞
+token_renewable      false
+token_policies       ["root"]
+identity_policies    []
+policies             ["root"]
+```
+---
 
 - Enable the Transit Secrets Engine
 
@@ -110,9 +175,53 @@ EOF
   policies             ["app-01" "default"]
 ```
 
+- Express the environment variable for the given Vault token:
+
+```bash
+  export VAULT_TOKEN='s.dHIi7Wf1dU2paz8GVnuc1UQO'
+```
+
 ## Using the code examples
 
 ***A note about functional vs working code***: These examples help describe working conditions but are not ready for production roles. The breakdown is functional to support different crypto operations. In real-life, these code snippets shoudl be refactored, curated, or fully rewritten by your own team.
+
+You can test the instrumentation by running the **[vault_client_lib](source/vault_client_lib.py)** utility which makes three requests from Vault:
+
+1. In this mode, the utility authenticates with Vault instance 
+1. The utility then requests a new Transit data key.
+1. With the `ciphertext` received, the utility then decrypts the original `plaintext` key. 
+
+```bash
+python3 source/vault_client_lib.py 
+
+
+Data key request:
+
+{ 'auth': None,
+  'data': { 'ciphertext': 'vault:v1:9qZYd98tDCDCg/aB9/cgyjPN+fC4Rw6+FMh03aVirInhJIa0xZ8OvTNmPyEJ1j8aK1o+hul4Jb/FoA65',
+            'key_version': 1,
+            'plaintext': 'OaRF5IMUHnFtIWMxWVnzIdMpasKLviapy9g37vfnSto='},
+  'lease_duration': 0,
+  'lease_id': '',
+  'renewable': False,
+  'request_id': '35cdeaa2-37c4-e912-c657-79d58b131711',
+  'warnings': None,
+  'wrap_info': None}
+
+
+Data key recall:
+
+{ 'auth': None,
+  'data': {'plaintext': 'OaRF5IMUHnFtIWMxWVnzIdMpasKLviapy9g37vfnSto='},
+  'lease_duration': 0,
+  'lease_id': '',
+  'renewable': False,
+  'request_id': '9a71b1a4-dca4-6bbb-e7a1-c193441accec',
+  'warnings': None,
+  'wrap_info': None}
+
+```
+With a successful test of the basic instrumentation, it is possible to tyr out the encryption and decryption modules.
 
 ### Encrypting data 
 
