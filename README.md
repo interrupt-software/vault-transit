@@ -2,7 +2,7 @@
 
 The Transit Secrets Engine provides the ability to generate a high-entropy data key to support cryptographic operations locally. The premise is to support crypto services without routing the payload to Vault. The generation of the high-entropy key relies on an existing Transit endpoint that supports a named key.
 
-The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine. There is a distinction in using Transit backends for Encrypt-as-a-Service and localized, client-side or server-side crypto operations. The instrumentation of Transit provides consumers with a unique key to fullfil operations on demmand.
+The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine. There is a distinction in using Transit backends for Encryption-as-a-Service versus client-side or server-side crypto operations. The instrumentation of Transit provides consumers with a unique key to fullfil operations on demmand outside of the Vault continuum.
 
 Contents
 ========
@@ -126,7 +126,7 @@ policies             ["root"]
   vault secrets enable -path=$VAULT_MOUNTPOINT transit
 ```
 
-- Create a key ring label as `app-01`
+- In your Transit mount point, create a key ring labeled `app-01`
 
 ```bash
   vault write -f $VAULT_MOUNTPOINT/keys/$VAULT_TRANSIT_KEYRING
