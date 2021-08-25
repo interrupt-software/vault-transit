@@ -78,6 +78,14 @@ The module does the following:
 1. Uses the ciphertext and connects to vault to derive the original encryption key.
 1. Creates a new unencrypted file -without- the `aes.mode_cbc` extension.
 
+```console
+tree
+.
+├── Account-Information-Form.pdf
+├── Account-Information-Form.pdf.aes.mode_cbc
+└── Account-Information-Form.pdf.aes.mode_cbc.json
+```
+
 ## Configure Vault for a basic demonstration
 
 ## Use Code Examples
