@@ -6,10 +6,10 @@ Contents
 ========
 
 * [Purpose](#purpose)
-  * [Encrypting data](#encrypting-data)
-  * [Decrypting data](#decrypting-data)
-  * [Configure Vault](#configure-vault-for-a-basic-demonstration)
-  * [Use Code Examples](#use-code-examples)
+  * [Prepare a basic demonstration](#prepare-a-basic-demonstration)
+  * [Using the Code Examples](#using-the-code-examples)
+    * [Encrypting data](#encrypting-data)
+    * [Decrypting data](#decrypting-data)
 * [Encryption Patterns](#encryption-patterns)
   * [Consumer Authentication and Authorization](#consumer-authentication-and-authorization)
     * [Authentication](#authentication)
@@ -30,7 +30,7 @@ The main assets to consider in this exercise are:
 
 * **[d_aes_mode_cbc](source/d_aes_mode_cbc.py)**: Standalone decryption module that retreives a Transit data key derived from the metadata information (created by the encryption module). The `d` stands for `decryption`.
 
-* **[vault_client_lib](source/vault_client_lib.py)**: A simple library utility to connect to authenticate to a Vault instance. It is written in Python using the [HVAC](https://github.com/hvac/hvac) API client for Vault. This asset requires four environment variables as follows:
+* **[vault_client_lib](source/vault_client_lib.py)**: A simple library utility that connects to and authenticates with a Vault instance. This library uses the [HVAC](https://github.com/hvac/hvac) API client for Vault. This asset requires four environment variables as follows:
 
   * **VAULT_ADDR**: The network location of Vault. It is expressed as an URL like `http://127.0.0.1:8200`.
 
@@ -40,13 +40,85 @@ The main assets to consider in this exercise are:
 
   * **VAULT_MOUNTPOINT**: The typical default for the Transit Secrets Engine is `transit`. However, it is possible to enable multiple Transit endpoints and this option allows for additional entry points.
 
+## Prepare a basic demonstration
+
+### Configure the environment
+
+* Establish the inital Transit mount point as `transito`
+* Assume that we will label the key ring `app-02`
+* Our Vault instance is running locally
+
+We express the environment variables in Bash as follows:
+
+```bash
+  export VAULT_MOUNTPOINT='transit'
+  export VAULT_TRANSIT_KEYRING='app-01'
+  export VAULT_ADDR='http://127.0.0.1:8200'
+```
+
+### Configure Vault
+
+- Enable the Transit Secrets Engine
+
+```bash
+  vault secrets enable -path=$VAULT_MOUNTPOINT transit
+```
+
+- Create a key ring name app-01
+
+```bash
+  vault write -f $VAULT_MOUNTPOINT/keys/$VAULT_TRANSIT_KEYRING
+```
+
+- Create a basic access policy
+
+```bash
+cat << EOF > $VAULT_TRANSIT_KEYRING.hcl
+path "$VAULT_MOUNTPOINT/encrypt/$VAULT_TRANSIT_KEYRING" {
+   capabilities = [ "update" ]
+}
+
+path "$VAULT_MOUNTPOINT/encrypt/$VAULT_TRANSIT_KEYRING" {
+   capabilities = [ "update" ]
+}
+
+path "$VAULT_MOUNTPOINT/datakey/plaintext/$VAULT_TRANSIT_KEYRING" {
+   capabilities = [ "update" ]
+}
+EOF
+```
+
+- Create a policy for `app-01`
+
+```bash
+  vault policy write $VAULT_TRANSIT_KEYRING $VAULT_TRANSIT_KEYRING.hcl
+```
+
+- Generate a working Vault token that is applicable to the policy
+
+```bash
+  vault token create -policy=$VAULT_TRANSIT_KEYRING
+
+  Key                  Value
+  ---                  -----
+  token                s.dHIi7Wf1dU2paz8GVnuc1UQO
+  token_accessor       eJI7ogIBOkHaVkgVFcs2Ffeo
+  token_duration       768h
+  token_renewable      true
+  token_policies       ["app-01" "default"]
+  identity_policies    []
+  policies             ["app-01" "default"]
+```
+
+## Using the code examples
+
 ***A note about functional vs working code***: These examples help describe working conditions but are not ready for production roles. The breakdown is functional to support different crypto operations. In real-life, these code snippets shoudl be refactored, curated, or fully rewritten by your own team.
 
-## Encrypting data 
+### Encrypting data 
 
 The essential step to encrypt new data is as follows: 
 
-```console
+```bash
   python3 e_aes_mode_cbc.py Account-Information-Form.pdf
 ```
 
@@ -55,11 +127,11 @@ The encryption module produces two files:
 1. **[Account-Information-Form.pdf.aes.mode_cbc](sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc)** is the encrypted payload. 
 1. **[Account-Information-Form.pdf.aes.mode_cbc.json](sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc.json)** contains the metadata associated with the encrypted payload.
 
-## Decrypting data
+### Decrypting data
 
 To decrypt data the decryption module references an encrypted file by name. The module tries to find a corresponding JSON file with metadata. From the example above, assume that a local directory hosts an encrypted file and its corresponding metatadata:
 
-```console
+```bash
 tree              
 .
 ├── Account-Information-Form.pdf.aes.mode_cbc
@@ -68,27 +140,25 @@ tree
 
 The decryption is used as follows:
 
-```console
+```bash
   python3 d_aes_mode_cbc.py Account-Information-Form.pdf.aes.mode_cbc
 ```
 
 The module does the following:
 
-1. Reads the initialization vector used for encryption and required to rebuild the encryption cipher.
-1. Uses the ciphertext and connects to vault to derive the original encryption key.
-1. Creates a new unencrypted file -without- the `aes.mode_cbc` extension.
+1. Reads the initialization vector (`iv`) used during the encryption.
+1. Uses the `ciphertext` and connects to Vault to derive the original encryption key.
+1. Creates a new unencrypted file _without_ the `aes.mode_cbc` extension.
 
-```console
+In the new set of files, a new unencrypted file should be present.
+
+```bash
 tree
 .
 ├── Account-Information-Form.pdf
 ├── Account-Information-Form.pdf.aes.mode_cbc
 └── Account-Information-Form.pdf.aes.mode_cbc.json
 ```
-
-## Configure Vault for a basic demonstration
-
-## Use Code Examples
 
 # Encryption Patterns
 
@@ -101,7 +171,7 @@ In the illustration below, the consumer uses an LDAP account to authenticate wit
 
 For example, we use the Vault CLI to authenticate directly with Vault. Other methods are less involved and more automatic, and this example illustrates the implicit need to vet the consumers' identity.
 
-```console
+```bash
     vault login -method=ldap username=bender
     Password (will be hidden):
     Successfully authenticated! The policies that are associated
@@ -119,7 +189,7 @@ From the diagram, **Application 01** can be an individual component managed by a
 
 In this scenario, a policy describes the encryption and decryption capabilities as follows:
 
-```console
+```bash
 # app-01.hcl 
 path "transit/encrypt/app-01" {
    capabilities = [ "update" ]
@@ -134,7 +204,7 @@ Vault successfully validates the consumers' identity and returns a payload that 
 
 For the authenticated user, interacting directly with the Vault CLI, a bearer token allows for direct access to the secrets engine. 
 
-```console
+```bash
   Key                  Value
   ---                  -----
   token                s.dHIi7Wf1dU2paz8GVnuc1UQO
@@ -158,14 +228,14 @@ In this context, the consumer routes a data blob through the encryption endpoint
 
 Using the Vault CLI, the inline encryption operation requires passing the desired data encoded in the base64 scheme.
 
-```console
+```bash
   vault write transit/encrypt/app-01 \
   plaintext=$(base64 <<< "4024-0071-7958-8446")
 ```
 
 The returning payload object includes the corresponding encrypted ciphertext. The consumer is then responsible for storing the payload for future reference.
 
-```console
+```bash
   Key            Value
   ---            -----
   ciphertext     vault:v1:DFA010gVDW5ks6S5hQIjbRjuIhEXSnLm9gjYhRPqd+rZEdShzkXG0zb9kadL35g=
@@ -174,7 +244,7 @@ The returning payload object includes the corresponding encrypted ciphertext. Th
 
 For completeness, it is relevant to explain that the decryption procedure follows a similar pattern. With the successful authentication of the consumer, the policy allows for decryption services. The consumer then routes the ciphertext through Vault to obtain unencrypted data.
 
-```console
+```bash
   vault write transit/decrypt/app-01 \ 
   ciphertext="vault:v1:DFA010gVDW5ks6S5hQIjbRjuIhEXSnLm9gjYhRPqd+rZEdShzkXG0zb9kadL35g="
 
@@ -185,7 +255,7 @@ For completeness, it is relevant to explain that the decryption procedure follow
 
 The data produced is encoded in the base64 scheme and requires decoding.
 
-```console
+```bash
    base64 --decode <<< "NDAyNC0wMDcxLTc5NTgtODQ0Ng=="
    4024-0071-7958-8446
 ```
@@ -201,7 +271,7 @@ There are situations in which routing data through the Transit Secrets Engine is
 
 The first step is to update the appropriate capabilities to the consumer's policy. This ensures that the consumer can generate a new high-entropy key and value using **app-01** as the encryption key.
 
-```console
+```bash
 # app-01.hcl 
 path "transit/encrypt/app-01" {
    capabilities = [ "update" ]
@@ -218,7 +288,7 @@ path "transit/datakey/plaintext/app-01" {
 
 In a routine operation, the consumer can generate a request which responds with `ciphertext` and `plaintext` values.
 
-```console
+```bash
   vault write -f transit/datakey/plaintext/app-01 
   Key            Value
   ---            -----
