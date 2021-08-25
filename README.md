@@ -42,7 +42,7 @@ Please review the assets. The main assets to consider in this exercise are:
 ### Configure the environment
 
 * Establish the inital Transit mount point as `transit`
-* Assume that we will label the key ring `app-01`
+* Assume that we label the key ring as `app-01`
 * Our Vault instance is running locally
 
 We express the environment variables in Bash as follows:
@@ -61,7 +61,7 @@ We express the environment variables in Bash as follows:
   vault server -dev -dev-root-token-id="root"
 ```
 
-The response will generate a response similar to the following message:
+The response will generate a message similar to the following:
 
 ```bash
 WARNING! dev mode is enabled! In this mode, Vault runs entirely in-memory
@@ -126,13 +126,13 @@ policies             ["root"]
   vault secrets enable -path=$VAULT_MOUNTPOINT transit
 ```
 
-- Create a key ring name app-01
+- Create a key ring label as `app-01`
 
 ```bash
   vault write -f $VAULT_MOUNTPOINT/keys/$VAULT_TRANSIT_KEYRING
 ```
 
-- Create a basic access policy
+- Create a basic access policy related to the expected Transit path
 
 ```bash
 cat << EOF > $VAULT_TRANSIT_KEYRING.hcl
@@ -160,7 +160,9 @@ EOF
 
 ```bash
   vault token create -policy=$VAULT_TRANSIT_KEYRING
-
+```
+The response from the `token create` directive inclues a bearer token. For testing purposes, the token acts as the authentication vehicle for the consumer. In real-life, there are more sophisticated authentication techniques that may require different instrumentation.
+```
   Key                  Value
   ---                  -----
   token                s.dHIi7Wf1dU2paz8GVnuc1UQO
@@ -184,9 +186,11 @@ EOF
 
 You can test the instrumentation by running the **[vault_client_lib](source/vault_client_lib.py)** utility which makes three requests from Vault:
 
-1. In this mode, the utility authenticates with Vault instance 
-1. The utility then requests a new Transit data key.
-1. With the `ciphertext` received, the utility then decrypts the original `plaintext` key. 
+1. In this mode of operation, the utility authenticates with Vault instance using the token expressed in the environment variables. It targets the Vault instance identified with the environment variables.
+
+1. The utility then requests a new Transit data key using the Transit mount point and Transit key ring exposed with the environment variables.
+
+1. With the `ciphertext` received, the utility decrypts the original `plaintext` key. 
 
 ```bash
 python3 source/vault_client_lib.py 
@@ -218,7 +222,7 @@ Data key recall:
   'wrap_info': None}
 
 ```
-With a successful test of the basic instrumentation, it is possible to tyr out the encryption and decryption modules.
+With a successful test of the basic instrumentation, it is possible to try out the encryption and decryption modules.
 
 ### Encrypting data 
 
@@ -235,7 +239,7 @@ The encryption module produces two files:
 
 ### Decrypting data
 
-To decrypt data the decryption module references an encrypted file by name. The module tries to find a corresponding JSON file with metadata. From the example above, assume that a local directory hosts an encrypted file and its corresponding metatadata:
+To decrypt data, the decryption module references an encrypted file by name. The module tries to find a corresponding JSON file that contains metadata. From the example above, assume that a local directory hosts an encrypted file and its corresponding metatadata:
 
 ```bash
 tree              
@@ -244,7 +248,7 @@ tree
 └── Account-Information-Form.pdf.aes.mode_cbc.json
 ```
 
-The decryption is used as follows:
+The decryption command is as follows:
 
 ```bash
   python3 d_aes_mode_cbc.py Account-Information-Form.pdf.aes.mode_cbc
@@ -252,7 +256,7 @@ The decryption is used as follows:
 
 The module does the following:
 
-1. Reads the initialization vector (`iv`) used during the encryption.
+1. Reads the initialization vector (`iv`) used during the encryption which is saved in the medatadata .
 1. Uses the `ciphertext` and connects to Vault to derive the original encryption key.
 1. Creates a new unencrypted file _without_ the `aes.mode_cbc` extension.
 
@@ -273,6 +277,7 @@ tree
 Any consumer that interacts with Vault requires authentication. The basic premise is to use Vault to broker the consumer's identity against many authentication engines. Vault maintains a relationship using a role that matches a privileged role within the target identity and authentication engine. 
 
 ### Authentication
+
 In the illustration below, the consumer uses an LDAP account to authenticate with Vault—the Vault LDAP Authentication engine aligns with the corporate LDAP Engine to verify and confirm the identity.
 
 For example, we use the Vault CLI to authenticate directly with Vault. Other methods are less involved and more automatic, and this example illustrates the implicit need to vet the consumers' identity.
