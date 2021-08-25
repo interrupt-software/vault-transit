@@ -1,6 +1,6 @@
 # Encryption with external data keys
 
-The Transit Secrets Engine provides the ability to generate a high-entropy data key to support encryption locally. The premise is to support encryption services without routing the payload to Vault. The generation of the high-entropy key relies on an existing encryption endpoint that supports a named key.
+The Transit Secrets Engine provides the ability to generate a high-entropy data key to support cryptographic operations locally. The premise is to support crypto services without routing the payload to Vault. The generation of the high-entropy key relies on an existing Transit endpoint that supports a named key.
 
 Contents
 ========
@@ -9,7 +9,6 @@ Contents
   * [Encrypting data](#encrypting-data)
   * [Configure Vault](#configure-vault-for-a-basic-demonstration)
   * [Use Code Examples](#use-code-examples)
-    * [Functional Code vs Working Code](#functional-code-vs-working-code)
 * [Encryption Patterns](#encryption-patterns)
   * [Consumer Authentication and Authorization](#consumer-authentication-and-authorization)
     * [Authentication](#authentication)
@@ -22,15 +21,32 @@ Contents
 
 ## Purpose
 
-The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine.
+The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine. There is a distinction in using Transit backends for Encrypt-as-a-Service against localized, client-side or server-side crypto operations. The instrumentation of Transit provides consumers with a unique key to fullfil operations on demmand.
+
+The main assets to consider in this exercise are:
+
+* **[e_aes_mode_cbc](source/e_aes_mode_cbc.py)**: Standalone encryption module that uses a Transit data key. This example applies AES.MODE_CBC encrytion and generates metadata.
+
+* **[d_aes_mode_cbc](source/d_aes_mode_cbc.py)**: Standalone decryption module that retreives a Transit data key derived from the metadata information (created by the encryption module).
+
+* **[vault_client_lib](source/vault_client_lib.py)**: A simple library utility to connect to authenticate to a Vault instance. It is written in Python using the [HVAC](https://github.com/hvac/hvac) API client for Vault. This asset requires four environment variables as follows:
+
+  * **VAULT_ADDR**: The network location of Vault. It is expressed as an URL like `http://127.0.0.1:8200`.
+
+  * **VAULT_TOKEN**: The main authentication credential to access Vault. This is used as an authentication method to validate the identity of the consumer.
+
+  * **VAULT_TRANSIT_KEYRING**: The label of the named key in the Transit secrets engine. In our examples we use `app-01` but this can be expressed to reflect any other conditions.
+
+  * **VAULT_MOUNTPOINT**: The typical default for the Transit Secrets Engine is `transit`. However, it is possible to enable multiple Transit endpoints and this option allows for additional entry points.
+
+
+***A note about functional vs working Code***
 
 ## Encrypting data 
 
 ## Configure Vault for a basic demonstration
 
 ## Use Code Examples
-
-### Functional Code vs Working Code
 
 # Encryption Patterns
 
