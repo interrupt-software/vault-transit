@@ -7,6 +7,7 @@ Contents
 
 * [Purpose](#purpose)
   * [Encrypting data](#encrypting-data)
+  * [Decrypting data](#decrypting-data)
   * [Configure Vault](#configure-vault-for-a-basic-demonstration)
   * [Use Code Examples](#use-code-examples)
 * [Encryption Patterns](#encryption-patterns)
@@ -21,13 +22,13 @@ Contents
 
 ## Purpose
 
-The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine. There is a distinction in using Transit backends for Encrypt-as-a-Service against localized, client-side or server-side crypto operations. The instrumentation of Transit provides consumers with a unique key to fullfil operations on demmand.
+The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine. There is a distinction in using Transit backends for Encrypt-as-a-Service and localized, client-side or server-side crypto operations. The instrumentation of Transit provides consumers with a unique key to fullfil operations on demmand.
 
 The main assets to consider in this exercise are:
 
-* **[e_aes_mode_cbc](source/e_aes_mode_cbc.py)**: Standalone encryption module that uses a Transit data key. This example applies AES.MODE_CBC encrytion and generates metadata.
+* **[e_aes_mode_cbc](source/e_aes_mode_cbc.py)**: Standalone encryption module that uses a Transit data key. This example applies AES.MODE_CBC encrytion and generates metadata. The `e` stands for `encription`.
 
-* **[d_aes_mode_cbc](source/d_aes_mode_cbc.py)**: Standalone decryption module that retreives a Transit data key derived from the metadata information (created by the encryption module).
+* **[d_aes_mode_cbc](source/d_aes_mode_cbc.py)**: Standalone decryption module that retreives a Transit data key derived from the metadata information (created by the encryption module). The `d` stands for `decryption`.
 
 * **[vault_client_lib](source/vault_client_lib.py)**: A simple library utility to connect to authenticate to a Vault instance. It is written in Python using the [HVAC](https://github.com/hvac/hvac) API client for Vault. This asset requires four environment variables as follows:
 
@@ -39,10 +40,43 @@ The main assets to consider in this exercise are:
 
   * **VAULT_MOUNTPOINT**: The typical default for the Transit Secrets Engine is `transit`. However, it is possible to enable multiple Transit endpoints and this option allows for additional entry points.
 
-
-***A note about functional vs working Code***
+***A note about functional vs working code***: These examples help describe working conditions but are not ready for production roles. The breakdown is functional to support different crypto operations. In real-life, these code snippets shoudl be refactored, curated, or fully rewritten by your own team.
 
 ## Encrypting data 
+
+The essential step to encrypt new data is as follows: 
+
+```bash
+  python3 e_aes_mode_cbc.py Account-Information-Form.pdf
+```
+
+The encryption module produces two files:
+
+1. **[Account-Information-Form.pdf.aes.mode_cbc](sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc)** is the encrypted payload. 
+1. **[Account-Information-Form.pdf.aes.mode_cbc.json](sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc.json)** contains the metadata associated with the encrypted payload.
+
+## Decrypting data
+
+To decrypt data the decryption module references an encrypted file by name. The module tries to find a corresponding JSON file with metadata. From the example above, assume that a local directory hosts an encrypted file and its corresponding metatadata:
+
+```bash
+tree              
+.
+├── Account-Information-Form.pdf.aes.mode_cbc
+└── Account-Information-Form.pdf.aes.mode_cbc.json
+```
+
+The decryption is used as follows:
+
+```bash
+  python3 d_aes_mode_cbc.py Account-Information-Form.pdf.aes.mode_cbc
+```
+
+The module does the following:
+
+1. Reads the initialization vector used for encryption and required to rebuild the encryption cipher.
+1. Uses the ciphertext and connects to vault to derive the original encryption key.
+1. Creates a new unencrypted file -without- the `aes.mode_cbc` extension.
 
 ## Configure Vault for a basic demonstration
 
