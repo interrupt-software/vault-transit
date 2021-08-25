@@ -1,6 +1,38 @@
- # Background
+# Encryption with external data keys
 
-The Transit Secrets Engine provides the ability to generate a high-entropy key to support encryption locally. The premise is to support encryption services without routing the payload to Vault. The generation of the high-entropy key relies on an existing encryption endpoint that supports a named key.
+The Transit Secrets Engine provides the ability to generate a high-entropy data key to support encryption locally. The premise is to support encryption services without routing the payload to Vault. The generation of the high-entropy key relies on an existing encryption endpoint that supports a named key.
+
+Contents
+========
+
+* [Purpose](#purpose)
+  * [Encrypting data](#encrypting-data)
+  * [Configure Vault](#configure-vault-for-a-basic-demonstration)
+  * [Use Code Examples](#use-code-examples)
+    * [Functional Code vs Working Code](#functional-code-vs-working-code)
+* [Encryption Patterns](#encryption-patterns)
+  * [Consumer Authentication and Authorization](#consumer-authentication-and-authorization)
+    * [Authentication](#authentication)
+    * [Authorization](#authorization)
+  * [Encryption-as-a-Service](#encryption-as-a-Service)
+  * [Generating an external data key](#generating-an-external-data-key)
+  * [Applying the data key](#applying-the-data-key)
+
+---
+
+## Purpose
+
+The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine.
+
+## Encrypting data 
+
+## Configure Vault for a basic demonstration
+
+## Use Code Examples
+
+### Functional Code vs Working Code
+
+# Encryption Patterns
 
 ## Consumer Authentication and Authorization
 
