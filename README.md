@@ -2,11 +2,12 @@
 
 The Transit Secrets Engine provides the ability to generate a high-entropy data key to support cryptographic operations locally. The premise is to support crypto services without routing the payload to Vault. The generation of the high-entropy key relies on an existing Transit endpoint that supports a named key.
 
+The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine. There is a distinction in using Transit backends for Encrypt-as-a-Service and localized, client-side or server-side crypto operations. The instrumentation of Transit provides consumers with a unique key to fullfil operations on demmand.
+
 Contents
 ========
 
-* [Purpose](#purpose)
-  * [Prepare a basic demonstration](#prepare-a-basic-demonstration)
+* [Basic demo](#basic-demonstration)
   * [Using the Code Examples](#using-the-code-examples)
     * [Encrypting data](#encrypting-data)
     * [Decrypting data](#decrypting-data)
@@ -20,11 +21,9 @@ Contents
 
 ---
 
-## Purpose
+## Basic demonstration
 
-The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine. There is a distinction in using Transit backends for Encrypt-as-a-Service and localized, client-side or server-side crypto operations. The instrumentation of Transit provides consumers with a unique key to fullfil operations on demmand.
-
-The main assets to consider in this exercise are:
+Please review the assets. The main assets to consider in this exercise are:
 
 * **[e_aes_mode_cbc](source/e_aes_mode_cbc.py)**: Standalone encryption module that uses a Transit data key. This example applies AES.MODE_CBC encrytion and generates metadata. The `e` stands for `encryption`.
 
@@ -39,8 +38,6 @@ The main assets to consider in this exercise are:
   * **VAULT_TRANSIT_KEYRING**: The label of the named key in the Transit secrets engine. In our examples we use `app-01` but this can be expressed to reflect any other conditions.
 
   * **VAULT_MOUNTPOINT**: The typical default for the Transit Secrets Engine is `transit`. However, it is possible to enable multiple Transit endpoints and this option allows for additional entry points.
-
-## Prepare a basic demonstration
 
 ### Configure the environment
 
