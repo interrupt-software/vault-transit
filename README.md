@@ -227,7 +227,7 @@ The command to encrypt new data is as follows:
 Using our sample data in **[Account-Information-Form.pdf](sample_data/pdf/Account-Information-Form.pdf)**, we can use the following commnad:
 
 ```bash
-  python3 source/d_aes_mode_cbc.py sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc
+  python3 source/e_aes_mode_cbc.py sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc
 ```
 
 The encryption module produces two files:
@@ -255,7 +255,7 @@ tree
 The decryption command runs as follows:
 
 ```bash
-  python3 d_aes_mode_cbc.py sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc
+  python3 source/d_aes_mode_cbc.py sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc
 ```
 
 The module does the following:
