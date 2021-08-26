@@ -8,6 +8,8 @@ Contents
 ========
 
 * [Basic demo](#basic-demonstration)
+  * [Configure the environment](#configure-the-environment)
+  * [Configure Vault](#configure-vault)
   * [Using the Code Examples](#using-the-code-examples)
     * [Encrypting data](#encrypting-data)
     * [Decrypting data](#decrypting-data)
@@ -23,7 +25,7 @@ Contents
 
 ## Basic demonstration
 
-Please review the assets. The main assets to consider in this exercise are:
+The main assets to consider in this exercise are:
 
 * **[e_aes_mode_cbc](source/e_aes_mode_cbc.py)**: Standalone encryption module that uses a Transit data key. This example applies AES.MODE_CBC encrytion and generates metadata. The `e` stands for `encryption`.
 
@@ -55,7 +57,7 @@ We express the environment variables in Bash as follows:
 
 ### Configure Vault
 
-- If using a clean instance of Vault, you can run in development mode as follows:
+- If using a cleandevelopment instance of Vault, you can run as follows:
 
 ```bash
   vault server -dev -dev-root-token-id="root"
@@ -80,25 +82,12 @@ Root Token: root
 
 Development mode should NOT be used in production installations!
 ```
-- Unseal Vault
+- If necessary, you can unseal Vault with the command below. Normally, Vault is automatically unsealed when running in `dev` mode.
 ```bash
 vault operator unseal
-Unseal Key (will be hidden): 
-
-Key             Value
----             -----
-Seal Type       shamir
-Initialized     true
-Sealed          false
-Total Shares    1
-Threshold       1
-Version         1.8.1
-Storage Type    inmem
-Cluster Name    vault-cluster-632fa98d
-Cluster ID      7598338c-ac71-586e-4ffc-3a63d482f80a
-HA Enabled      false
 ```
-- Log into Vault as the root user
+
+- If necessary, log into Vault as the root user. The password is `root`.
 
 ```bash
 vault login 
@@ -126,7 +115,7 @@ policies             ["root"]
   vault secrets enable -path=$VAULT_MOUNTPOINT transit
 ```
 
-- In your Transit mount point, create a key ring labeled `app-01`
+- In your Transit mount point, create a key ring labeled `app-01`. The Transit mount point is already declared in the enviornment variable `$VAULT_MOUNTPOINT`. And, the key ring label is also expressed as an enviornment variable with `$VAULT_TRANSIT_KEYRING`.
 
 ```bash
   vault write -f $VAULT_MOUNTPOINT/keys/$VAULT_TRANSIT_KEYRING
@@ -161,7 +150,7 @@ EOF
 ```bash
   vault token create -policy=$VAULT_TRANSIT_KEYRING
 ```
-The response from the `token create` directive inclues a bearer token. For testing purposes, the token acts as the authentication vehicle for the consumer. In real-life, there are more sophisticated authentication techniques that may require different instrumentation.
+The response from the `token create` directive above inclues a bearer token. For testing purposes, the token acts as the authentication vehicle for the consumer. In real-life, there are more sophisticated authentication techniques that may require different instrumentation.
 ```
   Key                  Value
   ---                  -----
@@ -182,13 +171,13 @@ The response from the `token create` directive inclues a bearer token. For testi
 
 ## Using the code examples
 
-***A note about functional vs working code***: These examples help describe working conditions but are not ready for production roles. The breakdown is functional to support different crypto operations. In real-life, these code snippets shoudl be refactored, curated, or fully rewritten by your own team.
+***A note about functional vs working code***: These examples help describe working conditions but are not ready for production roles. The breakdown is functional to support different crypto operations. In real-life, these code snippets should be refactored, curated, or fully rewritten.
 
 You can test the instrumentation by running the **[vault_client_lib](source/vault_client_lib.py)** utility which makes three requests from Vault:
 
-1. In this mode of operation, the utility authenticates with Vault instance using the token expressed in the environment variables. It targets the Vault instance identified with the environment variables.
+1. In this mode of operation, the utility authenticates with Vault instance using the token expressed with $VAULT_TOKEN. It targets the Vault instance identified with $VAULT_ADDR.
 
-1. The utility then requests a new Transit data key using the Transit mount point and Transit key ring exposed with the environment variables.
+1. The utility then requests a new Transit data key using the Transit mount point expressed with $TRANSIT_MOUNTPOINT and Transit key ring exposed with $VAULT_TRANSIT_KEYRING environment variables.
 
 1. With the `ciphertext` received, the utility decrypts the original `plaintext` key. 
 
@@ -226,10 +215,15 @@ With a successful test of the basic instrumentation, it is possible to try out t
 
 ### Encrypting data 
 
-The essential step to encrypt new data is as follows: 
+The command to encrypt new data is as follows:
+
+```console
+  python3 e_aes_mode_cbc.py <path-to-target-file>
+```
+Using our sample data in **[Account-Information-Form.pdf](sample_data/pdf/Account-Information-Form.pdf)**, we can use the following commnad:
 
 ```bash
-  python3 e_aes_mode_cbc.py Account-Information-Form.pdf
+  python3 e_aes_mode_cbc.py sample_data/pdf/Account-Information-Form.pdf
 ```
 
 The encryption module produces two files:
@@ -248,15 +242,15 @@ tree
 └── Account-Information-Form.pdf.aes.mode_cbc.json
 ```
 
-The decryption command is as follows:
+The decryption command runs as follows:
 
 ```bash
-  python3 d_aes_mode_cbc.py Account-Information-Form.pdf.aes.mode_cbc
+  python3 d_aes_mode_cbc.py sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc
 ```
 
 The module does the following:
 
-1. Reads the initialization vector (`iv`) used during the encryption which is saved in the medatadata .
+1. Reads the initialization vector (`iv`) used during the encryption which is saved in the **[medatadata](sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc.json)**.
 1. Uses the `ciphertext` and connects to Vault to derive the original encryption key.
 1. Creates a new unencrypted file _without_ the `aes.mode_cbc` extension.
 
