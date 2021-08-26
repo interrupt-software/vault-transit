@@ -25,6 +25,8 @@ Contents
 
 ## Basic demonstration
 
+The following instructions are here to help the practitioner explore the use case for an external data key, and to test encryption and decryption methods. If you are more interested in a general description, please see the [Encryption Patterns](#encryption-patterns) first.
+
 The main assets to consider in this exercise are:
 
 * **[e_aes_mode_cbc](source/e_aes_mode_cbc.py)**: Standalone encryption module that uses a Transit data key. This example applies AES.MODE_CBC encrytion and generates metadata. The `e` stands for `encryption`.
@@ -33,7 +35,7 @@ The main assets to consider in this exercise are:
 
 * **[vault_client_lib](source/vault_client_lib.py)**: A Python utility that connects to and authenticates with a Vault instance. This library uses the [HVAC](https://github.com/hvac/hvac) API client for Vault. This asset requires four environment variables as follows:
 
-  * **VAULT_ADDR**: The network location of Vault. It is expressed as an URL like `http://127.0.0.1:8200`.
+  * **VAULT_ADDR**: The network location of Vault. It is expressed as a URL like `http://127.0.0.1:8200`.
 
   * **VAULT_TOKEN**: The main authentication credential to access Vault. This is used as an authentication method to validate the identity of the consumer.
 
@@ -168,6 +170,8 @@ The response from the `token create` directive above inclues a bearer token. For
 ```bash
   export VAULT_TOKEN='s.dHIi7Wf1dU2paz8GVnuc1UQO'
 ```
+
+Once the environment and Vault are configured, we can use the coded examples to illustrate scenarios.
 
 ## Using the code examples
 
