@@ -131,7 +131,7 @@ path "$VAULT_MOUNTPOINT/encrypt/$VAULT_TRANSIT_KEYRING" {
    capabilities = [ "update" ]
 }
 
-path "$VAULT_MOUNTPOINT/encrypt/$VAULT_TRANSIT_KEYRING" {
+path "$VAULT_MOUNTPOINT/decrypt/$VAULT_TRANSIT_KEYRING" {
    capabilities = [ "update" ]
 }
 
