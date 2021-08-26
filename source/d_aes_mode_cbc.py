@@ -3,7 +3,6 @@ from base64 import b64decode
 from vault_client_lib import vault_client
 import json
 import sys
-import os
 
 in_filename = sys.argv[1]
 in_metadata = in_filename + ".json"
