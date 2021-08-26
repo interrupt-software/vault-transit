@@ -316,7 +316,7 @@ path "transit/decrypt/app-01" {
 }
 ```
 
-Vault successfully validates the consumers' identity and returns a payload that includes a bearer token. The consumer uses the token to access the secrets engine expressed in the policy. The metadata also describes additional policies linked to the token authorize the capabilities that the consumer can apply. The significance is the alignment with the desired policy, which allows the consumer to access the resources described by the policy **app-01**.
+Vault successfully validates the consumers' identity and returns a payload that includes a bearer token. The consumer uses the token to access the secrets engine with the capabilties expressed in the policy. The metadata also describes additional policies linked to the token authorize the capabilities that the consumer can apply. The significance is the alignment with the desired policy, which allows the consumer to access the resources described by the policy **app-01**.
 
 For the authenticated user, interacting directly with the Vault CLI, a bearer token allows for direct access to the secrets engine. 
 
