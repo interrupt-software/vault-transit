@@ -59,7 +59,7 @@ We express the environment variables in Bash as follows:
 
 ### Configure Vault
 
-- If using a cleandevelopment instance of Vault, you can run as follows:
+- If using a clean development instance of Vault, you can run Vault as follows:
 
 ```bash
   vault server -dev -dev-root-token-id="root"
