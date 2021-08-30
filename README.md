@@ -187,8 +187,9 @@ You can test the instrumentation by running the **[vault_client_lib](source/vaul
 
 ```bash
 python3 source/vault_client_lib.py 
+```
 
-
+```json
 Data key request:
 
 { 'auth': None,
@@ -213,7 +214,6 @@ Data key recall:
   'request_id': '9a71b1a4-dca4-6bbb-e7a1-c193441accec',
   'warnings': None,
   'wrap_info': None}
-
 ```
 With a successful test of the basic instrumentation, it is possible to try out the encryption and decryption modules.
 
