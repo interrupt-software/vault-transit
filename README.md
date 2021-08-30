@@ -19,7 +19,7 @@ Contents
     * [Authorization](#authorization)
   * [Encryption-as-a-Service](#encryption-as-a-Service)
   * [Generating an external data key](#generating-an-external-data-key)
-  * [Applying the data key](#applying-the-data-key)
+  * [Applying the data key](#applying-the-data-key-for-distinct-encryption-operations)
 
 ---
 
