@@ -51,7 +51,9 @@ class vault_client:
 
     def get_datakey(self, vault_transit_keyring=None, mount_point=None):
         """
-        Returns the payload for a new high-entropy key and the value encrypted with the named key. The data key is included in base64 encoded plaintext, and the ciphertext is used as reference to re-obtain the derived key payload.
+        Returns the payload for a new high-entropy key and the value encrypted with the named key.
+        The data key is included in base64 encoded plaintext, and the ciphertext is used as reference 
+        to re-obtain the derived key payload.
 
         :param str vault_transit_keyring: Name of the encryption key to use to encrypt the datakey
         :param str mount_point: The “path” on which the method/backend was mounted
