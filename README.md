@@ -67,7 +67,7 @@ We express the environment variables in Bash as follows:
 
 The response will generate a message similar to the following:
 
-```bash
+```
 WARNING! dev mode is enabled! In this mode, Vault runs entirely in-memory
 and starts unsealed with a single unseal key. The root token is already
 authenticated to the CLI, so you can immediately begin using Vault.
