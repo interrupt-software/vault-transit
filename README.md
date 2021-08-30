@@ -189,7 +189,7 @@ You can test the instrumentation by running the **[vault_client_lib](source/vaul
 python3 source/vault_client_lib.py 
 ```
 
-```json
+```
 Data key request:
 
 { 'auth': None,
