@@ -273,7 +273,7 @@ tree
 ├── Account-Information-Form.pdf.aes.mode_cbc
 └── Account-Information-Form.pdf.aes.mode_cbc.json
 ```
-Once we are able to demonstrate these procedures, we can focus on what on the essential background concepts that affect a larger enterprise. If necessary, there are additional sample data assets [sample data assets](sample_data) included in this repo that can be safely used to run addtional tests.
+Once we are able to demonstrate these procedures, we can focus on what on the essential background concepts that affect a larger enterprise. If necessary, there are additional sample data assets [sample data assets](sample_data) included in this repo that can be safely used to run additional tests.
 
 # Encryption Patterns
 
