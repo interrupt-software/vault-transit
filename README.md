@@ -2,7 +2,7 @@
 
 The Transit Secrets Engine provides the ability to generate a high-entropy data key to support cryptographic operations locally. The premise is to support crypto services without routing the payload to Vault. The generation of the high-entropy key relies on an existing Transit endpoint that supports a named key.
 
-The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine. There is a distinction in using Transit backends for Encryption-as-a-Service versus client-side or server-side crypto operations. The instrumentation of Transit provides consumers with a unique key to fullfil operations on demmand outside of the Vault continuum.
+The motivation for this exercise is to demonstrate practical, simplified examples of how to use an external, high-entropy data key generated with the Vault Transit Secrets Engine. There is a distinction in using Transit backends for Encryption-as-a-Service versus client-side or server-side crypto operations. The instrumentation of Transit provides consumers with a unique key to fulfill operations on-demand outside of the Vault continuum.
 
 Contents
 ========
@@ -39,14 +39,14 @@ The main assets to consider in this exercise are:
 
   * **VAULT_TOKEN**: The main authentication credential to access Vault. This is used as an authentication method to validate the identity of the consumer.
 
-  * **VAULT_TRANSIT_KEYRING**: The label of the named key in the Transit secrets engine. In our examples we use `app-01` but this can be expressed to reflect any other conditions.
+  * **VAULT_TRANSIT_KEYRING**: The label of the named key in the Transit secrets engine. In our examples, we use `app-01` but this can be expressed to reflect any other conditions.
 
   * **VAULT_MOUNTPOINT**: The typical default for the Transit Secrets Engine is `transit`. However, it is possible to enable multiple Transit endpoints and this option allows for additional entry points.
 
 ### Configure the environment
 
-* Establish the inital Transit mount point as `transit`
-* Assume that we label the key ring as `app-01`
+* Establish the initial Transit mount point as `transit`
+* Assume that we label the keyring as `app-01`
 * Our Vault instance is running locally
 
 We express the environment variables in Bash as follows:
@@ -117,7 +117,7 @@ policies             ["root"]
   vault secrets enable -path=$VAULT_MOUNTPOINT transit
 ```
 
-- In your Transit mount point, create a key ring labeled `app-01`. The Transit mount point is already declared in the enviornment variable `$VAULT_MOUNTPOINT`. And, the key ring label is also expressed as an enviornment variable with `$VAULT_TRANSIT_KEYRING`.
+- In your Transit mount point, create a key ring labelled `app-01`. The Transit mount point is already declared in the environment variable `$VAULT_MOUNTPOINT`. And, the keyring label is also expressed as an environment variable with `$VAULT_TRANSIT_KEYRING`.
 
 ```bash
   vault write -f $VAULT_MOUNTPOINT/keys/$VAULT_TRANSIT_KEYRING
@@ -152,7 +152,7 @@ EOF
 ```bash
   vault token create -policy=$VAULT_TRANSIT_KEYRING
 ```
-The response from the `token create` directive above inclues a bearer token. For testing purposes, the token acts as the authentication vehicle for the consumer. In real-life, there are more sophisticated authentication techniques that may require different instrumentation.
+The response from the `token create` directive above includes a bearer token. For testing purposes, the token acts as the authentication vehicle for the consumer. In real life, there are more sophisticated authentication techniques that may require different instrumentation.
 ```
   Key                  Value
   ---                  -----
@@ -175,7 +175,7 @@ Once the environment and Vault are configured, we can use the coded examples to 
 
 ## Using the code examples
 
-***A note about functional vs working code***: These examples help describe working conditions but are not ready for production roles. The breakdown is functional to support different crypto operations. In real-life, these code snippets should be refactored, curated, or fully rewritten.
+***A note about functional vs working code***: These examples help describe working conditions but are not ready for production roles. The breakdown is functional to support different crypto operations. In real life, these code snippets should be refactored, curated, or fully rewritten.
 
 You can test the instrumentation by running the **[vault_client_lib](source/vault_client_lib.py)** utility which makes three requests from Vault:
 
@@ -224,7 +224,7 @@ The command to encrypt new data is as follows:
 ```console
   python3 e_aes_mode_cbc.py <path-to-target-file>
 ```
-Using our sample data in **[Account-Information-Form.pdf](sample_data/pdf/Account-Information-Form.pdf)**, we can use the following commnad:
+Using our sample data in **[Account-Information-Form.pdf](sample_data/pdf/Account-Information-Form.pdf)**, we can use the following command:
 
 ```bash
   python3 source/e_aes_mode_cbc.py sample_data/pdf/Account-Information-Form.pdf.aes.mode_cbc
@@ -243,7 +243,7 @@ To decrypt data, the decryption module references an encrypted file by name. The
   python3 d_aes_mode_cbc.py <path-to-target-file>
 ```
 
-From the example above, assume that a local directory hosts an encrypted file and its corresponding metatadata:
+From the example above, assume that a local directory hosts an encrypted file and its corresponding metadata:
 
 ```bash
 tree              
@@ -316,7 +316,7 @@ path "transit/decrypt/app-01" {
 }
 ```
 
-Vault successfully validates the consumers' identity and returns a payload that includes a bearer token. The consumer uses the token to access the secrets engine with the capabilties expressed in the policy. The metadata also describes any additional policies linked to the token authorize the capabilities that the consumer can apply. The significance is the alignment with the desired policy, which allows the consumer to access the resources described by the policy **app-01**.
+Vault successfully validates the consumers' identity and returns a payload that includes a bearer token. The consumer uses the token to access the secrets engine with the capabilities expressed in the policy. The metadata also describes any additional policies linked to the token authorize the capabilities that the consumer can apply. The significance is the alignment with the desired policy, which allows the consumer to access the resources described by the policy **app-01**.
 
 For the authenticated user, interacting directly with the Vault CLI, a bearer token allows for direct access to the secrets engine. 
 
